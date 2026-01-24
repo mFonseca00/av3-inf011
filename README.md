@@ -17,7 +17,7 @@ O padrão Strategy possui uma estrutura composta da seguinte forma:
 Context (Que no nosso código é a classe Autenticador) que usa a Interface de Strategy (Que no nosso código é representado por AuthStrategy) e essa interface é implementada pela Concrete Strategy (Que no nosso código são as classes DefaultAuthStrategy, CriminalAuthStrategy, ExportAuthStrategy, PessoalAuthStrategy)
 
 ## 🔄 Fluxo de Funcionamento
-
+```text
 Cliente cria um Autenticador (Context)
               │
               ▼
@@ -36,7 +36,7 @@ Strategy concreta gera o código específico
               │
               ▼
 Código é atribuído ao documento
-
+```
 ## Resumo dos Papéis
 
 | Componente       |        Classe          |                  Responsabilidade                         |
