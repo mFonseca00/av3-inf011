@@ -1,27 +1,28 @@
 package br.ifba.edu.inf011.model;
 
-import java.time.LocalDate;
-
 import br.ifba.edu.inf011.model.documentos.Documento;
-import br.ifba.edu.inf011.model.documentos.Privacidade;
+import br.ifba.edu.inf011.strategy.AuthStrategy;
+import br.ifba.edu.inf011.strategy.DefaultAuthStrategy;
 
 public class Autenticador {
-	
-	public void autenticar(Integer tipo, Documento documento) {
-		String numero;
-		if(tipo == 0)
-			numero = "CRI-" + LocalDate.now().getYear() + "-" + documento.hashCode();
-		else if(tipo == 1)
-			numero = "PES-" + LocalDate.now().getDayOfYear() + "-" + documento.getProprietario().hashCode();
-		else if (tipo == 2) {
-            if (documento.getPrivacidade() == Privacidade.SIGILOSO) {
-                numero = "SECURE-" + documento.getNumero().hashCode();
-            } else {
-                numero = "PUB-" + documento.hashCode();
-            }
-        }else
-			numero = "DOC-" + System.currentTimeMillis(); 
-		documento.setNumero(numero);
+	// context
+	private AuthStrategy strategy;
+    
+    public Autenticador() {
+        this.strategy = new DefaultAuthStrategy();
+    }
+    
+    public Autenticador(AuthStrategy strategy) {
+        this.strategy = strategy;
+    }
+    
+    public void setStrategy(AuthStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+	public void autenticar(Documento documento) {
+        String numero = this.strategy.generateAuthCode(documento);
+        documento.setNumero(numero);
 	}
 
 }

@@ -2,14 +2,17 @@ package br.ifba.edu.inf011.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import br.ifba.edu.inf011.af.DocumentOperatorFactory;
 import br.ifba.edu.inf011.model.documentos.Documento;
 import br.ifba.edu.inf011.model.documentos.Privacidade;
 import br.ifba.edu.inf011.model.operador.Operador;
+import br.ifba.edu.inf011.strategy.*;
 
 public class GerenciadorDocumentoModel {
-
+    // client
+    private Map<Integer , AuthStrategy> strategies;
 	private List<Documento> repositorio;
     private DocumentOperatorFactory factory;
     private Autenticador autenticador;
@@ -23,6 +26,11 @@ public class GerenciadorDocumentoModel {
         this.autenticador = new Autenticador();
         this.gestor = new GestorDocumento();
         this.atual = null;
+        this.strategies = Map.of(
+            0, new CriminalAuthStrategy(),
+            1, new PessoalAuthStrategy(),
+            2, new ExportAuthStrategy()
+        );
     }
 
     public Documento criarDocumento(int tipoAutenticadorIndex, Privacidade privacidade) throws FWDocumentException {
@@ -31,8 +39,15 @@ public class GerenciadorDocumentoModel {
         
         operador.inicializar("jdc", "João das Couves");
         documento.inicializar(operador, privacidade);
-        
-        this.autenticador.autenticar(tipoAutenticadorIndex, documento);
+
+        if(strategies.get(tipoAutenticadorIndex) == null) {
+            this.autenticador.setStrategy(new DefaultAuthStrategy());
+        }
+        else {
+            this.autenticador.setStrategy(strategies.get(tipoAutenticadorIndex));
+        }
+
+        this.autenticador.autenticar(documento);
         this.repositorio.add(documento);
         this.atual = documento;
         return documento;

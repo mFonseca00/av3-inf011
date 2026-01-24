@@ -1,10 +1,9 @@
 package br.ifba.edu.inf011.ui;
 
-import javax.swing.JOptionPane;
-
 import br.ifba.edu.inf011.af.DocumentOperatorFactory;
 import br.ifba.edu.inf011.model.FWDocumentException;
 import br.ifba.edu.inf011.model.documentos.Privacidade;
+import javax.swing.JOptionPane;
 
 public class MyGerenciadorDocumentoUI extends AbstractGerenciadorDocumentosUI{
 	
