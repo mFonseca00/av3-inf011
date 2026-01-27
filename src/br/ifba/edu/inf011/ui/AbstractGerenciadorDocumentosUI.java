@@ -67,6 +67,10 @@ public abstract class AbstractGerenciadorDocumentosUI extends JFrame implements 
 
     protected void refreshUI() {
         try {
+			if (this.atual == null) {
+				this.areaEdicao.atualizar("");
+				return;
+			}
         	this.areaEdicao.atualizar(this.atual.getConteudo());
         } catch (Exception e) {
         	this.areaEdicao.atualizar("");
@@ -80,6 +84,7 @@ public abstract class AbstractGerenciadorDocumentosUI extends JFrame implements 
 			int index = this.barraDocs.getIndiceDocSelecionado();
 	        if (index != -1) {
 	            this.atual = controller.getRepositorio().get(index);
+				this.controller.setDocumentoAtual(this.atual);
 	            this.refreshUI();
 	        }
         }

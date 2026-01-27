@@ -25,7 +25,7 @@ public class CommandManager {
         command.execute();
         undoStack.push(command);
         redoStack.clear(); // Limpa redo ao executar novo comando
-        log("EXECUTE - ", command.getLogInfo());
+        log("EXECUTE", command.getLogInfo());
     }
 
     public boolean undo() {
@@ -36,7 +36,7 @@ public class CommandManager {
         Command command = undoStack.pop();
         command.undo();
         redoStack.push(command);
-        log("UNDO - ", command.getLogInfo());
+        log("UNDO", command.getLogInfo());
         return true;
     }
 
@@ -48,7 +48,7 @@ public class CommandManager {
         Command command = redoStack.pop();
         command.execute();
         undoStack.push(command);
-        log("REDO - ", command.getLogInfo());
+        log("REDO", command.getLogInfo());
         return true;
     }
 

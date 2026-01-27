@@ -35,8 +35,10 @@ public class GerenciadorDocumentoModel {
     }
 
     public Documento criarDocumento(int tipoAutenticadorIndex, Privacidade privacidade) throws FWDocumentException {
+        // Mock de operador
         Operador operador = factory.getOperador();
         operador.inicializar("jdc", "João das Couves");
+
         AuthStrategy strategy = strategies.get(tipoAutenticadorIndex);
         if (strategy == null) {
             strategy = new DefaultAuthStrategy();
@@ -61,7 +63,11 @@ public class GerenciadorDocumentoModel {
         commandManager.executeCommand(comando);
     }
 
-    public void assinarDocumento(Operador operador) throws FWDocumentException {
+    public void assinarDocumento() throws FWDocumentException {
+        // Mock de operador
+        Operador operador = factory.getOperador();
+        operador.inicializar("jdc", "João das Couves");
+
         if (holder.getDocument() == null) {
             System.err.println("Nenhum documento selecionado");
             return;
@@ -94,7 +100,11 @@ public class GerenciadorDocumentoModel {
         atualizarRepositorio(documentoAntigo, holder.getDocument());
     }
 
-    public void alterarEAssinar(String conteudo, Operador operador) throws FWDocumentException {
+    public void alterarEAssinar(String conteudo) throws FWDocumentException {
+        // Mock de operador
+        Operador operador = factory.getOperador();
+        operador.inicializar("jdc", "João das Couves");
+
         if (holder.getDocument() == null) {
             System.err.println("Nenhum documento selecionado");
             return;
@@ -107,7 +117,11 @@ public class GerenciadorDocumentoModel {
         atualizarRepositorio(documentoAntigo, holder.getDocument());
     }
 
-    public void priorizar(Operador operador) throws FWDocumentException {
+    public void priorizar() throws FWDocumentException {
+        // Mock de operador
+        Operador operador = factory.getOperador();
+        operador.inicializar("jdc", "João das Couves");
+
         if (holder.getDocument() == null) {
             System.err.println("Nenhum documento selecionado");
             return;
@@ -190,7 +204,13 @@ public class GerenciadorDocumentoModel {
 
 	public void setDocumentoAtual(Documento doc) {
 		this.holder.setDocument(doc);
-	}        
+	}
     
+    public int getUndoSize(){
+        return this.commandManager.getUndoSize();
+    }
     
+    public int getRedoSize(){
+        return this.commandManager.getRedoSize();
+    }
 }

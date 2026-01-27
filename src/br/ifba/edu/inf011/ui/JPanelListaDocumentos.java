@@ -31,13 +31,31 @@ public class JPanelListaDocumentos<T> extends JPanel{
         this.listDocumentos.setSelectedIndex(model.size() - 1);
         this.updateUI();
 	}
-	
-	
+
+	public void removerDocumento(int index) {
+		DefaultListModel<T> model = (DefaultListModel<T>)this.listDocumentos.getModel();
+		if (index >= 0 && index < model.size()) {
+			model.remove(index);
+
+			if (model.size() == 0) {
+				this.listDocumentos.clearSelection();
+			}
+			else if (index > 0) {
+				this.listDocumentos.setSelectedIndex(index - 1);
+			} else {
+				this.listDocumentos.setSelectedIndex(0);
+			}
+
+			this.updateUI();
+		}
+	}
+
 	public int getIndiceDocSelecionado() {
 		return this.listDocumentos.getSelectedIndex();
 	}
-	
-	
-	
 
+
+	public DefaultListModel<T> getModel() {
+		return (javax.swing.DefaultListModel<T>) this.listDocumentos.getModel();
+	}
 }

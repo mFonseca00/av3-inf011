@@ -1,0 +1,24 @@
+[2026-01-27 04:13:20] EXECUTE - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:13:22] UNDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:13:24] REDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:13:27] EXECUTE - Assinar documento - Operador: João das Couves
+[2026-01-27 04:13:29] UNDO - Assinar documento - Operador: João das Couves
+[2026-01-27 04:13:31] REDO - Assinar documento - Operador: João das Couves
+[2026-01-27 04:13:33] UNDO - Assinar documento - Operador: João das Couves
+[2026-01-27 04:13:34] UNDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:13:36] REDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:13:41] EXECUTE - Salvar conteúdo do documento
+[2026-01-27 04:13:46] EXECUTE - Assinar documento - Operador: João das Couves
+[2026-01-27 04:13:48] EXECUTE - Proteger documento
+[2026-01-27 04:13:51] EXECUTE - Tornar documento urgente
+[2026-01-27 04:13:54] EXECUTE - Macro: Priorizar (2 operações)
+[2026-01-27 04:13:58] UNDO - Macro: Priorizar (2 operações)
+[2026-01-27 04:14:01] UNDO - Tornar documento urgente
+[2026-01-27 04:14:03] UNDO - Proteger documento
+[2026-01-27 04:14:05] UNDO - Assinar documento - Operador: João das Couves
+[2026-01-27 04:14:06] UNDO - Salvar conteúdo do documento
+[2026-01-27 04:14:08] UNDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:14:10] REDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:14:14] EXECUTE - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:14:16] UNDO - Criar documento - Privacidade: PUBLICO
+[2026-01-27 04:14:18] UNDO - Criar documento - Privacidade: PUBLICO
