@@ -1,31 +1,32 @@
 package br.ifba.edu.inf011.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import br.ifba.edu.inf011.af.DocumentOperatorFactory;
+import br.ifba.edu.inf011.command.*;
 import br.ifba.edu.inf011.model.documentos.Documento;
 import br.ifba.edu.inf011.model.documentos.Privacidade;
 import br.ifba.edu.inf011.model.operador.Operador;
 import br.ifba.edu.inf011.strategy.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+// client
 public class GerenciadorDocumentoModel {
-    // client
     private Map<Integer , AuthStrategy> strategies;
 	private List<Documento> repositorio;
     private DocumentOperatorFactory factory;
     private Autenticador autenticador;
     private GestorDocumento gestor;
-    private Documento atual;
-
+    private DocumentHolder holder;
+    private CommandManager commandManager;
 
     public GerenciadorDocumentoModel(DocumentOperatorFactory factory) {
-        this.repositorio = new ArrayList<>();
         this.factory = factory;
+        this.repositorio = new ArrayList<>();
         this.autenticador = new Autenticador();
         this.gestor = new GestorDocumento();
-        this.atual = null;
+        this.holder = new DocumentHolder(null);
+        this.commandManager = new CommandManager();
         this.strategies = Map.of(
             0, new CriminalAuthStrategy(),
             1, new PessoalAuthStrategy(),
@@ -35,75 +36,160 @@ public class GerenciadorDocumentoModel {
 
     public Documento criarDocumento(int tipoAutenticadorIndex, Privacidade privacidade) throws FWDocumentException {
         Operador operador = factory.getOperador();
-        Documento documento = factory.getDocumento();
-        
         operador.inicializar("jdc", "João das Couves");
-        documento.inicializar(operador, privacidade);
-
-        if(strategies.get(tipoAutenticadorIndex) == null) {
-            this.autenticador.setStrategy(new DefaultAuthStrategy());
+        AuthStrategy strategy = strategies.get(tipoAutenticadorIndex);
+        if (strategy == null) {
+            strategy = new DefaultAuthStrategy();
         }
-        else {
-            this.autenticador.setStrategy(strategies.get(tipoAutenticadorIndex));
+        this.autenticador.setStrategy(strategy);
+        Command comando = new CriarDocCommand(holder, factory, autenticador,
+                privacidade, operador);
+        commandManager.executeCommand(comando);
+        Documento doc = holder.getDocument();
+        if (doc != null && !repositorio.contains(doc)) {
+            repositorio.add(doc);
         }
-
-        this.autenticador.autenticar(documento);
-        this.repositorio.add(documento);
-        this.atual = documento;
-        return documento;
+        return doc;
     }
 
-    public void salvarDocumento(Documento doc, String conteudo) throws Exception {
-        if (doc != null) {
-            doc.setConteudo(conteudo);
+    public void salvarDocumento(String conteudo) throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
         }
-        this.atual = doc;
+        Command comando = new SalvarCommand(holder, conteudo);
+        commandManager.executeCommand(comando);
+    }
+
+    public void assinarDocumento(Operador operador) throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
+        }
+        Documento documentoAntigo = holder.getDocument();
+        Command comando = new AssinarCommand(holder, gestor, operador);
+        commandManager.executeCommand(comando);
+        atualizarRepositorio(documentoAntigo, holder.getDocument());
+    }
+
+    public void protegerDocumento() throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
+        }
+        Documento documentoAntigo = holder.getDocument();
+        Command comando = new ProtegerCommand(holder, gestor);
+        commandManager.executeCommand(comando);
+        atualizarRepositorio(documentoAntigo, holder.getDocument());
+    }
+
+    public void tornarUrgente() throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
+        }
+        Documento documentoAntigo = holder.getDocument();
+        Command comando = new TornarUrgenteCommand(holder, gestor);
+        commandManager.executeCommand(comando);
+        atualizarRepositorio(documentoAntigo, holder.getDocument());
+    }
+
+    public void alterarEAssinar(String conteudo, Operador operador) throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
+        }
+        Documento documentoAntigo = holder.getDocument();
+        MacroCommand macro = new MacroCommand("Alterar e Assinar");
+        macro.adicionarComando(new SalvarCommand(holder, conteudo));
+        macro.adicionarComando(new AssinarCommand(holder, gestor, operador));
+        commandManager.executeCommand(macro);
+        atualizarRepositorio(documentoAntigo, holder.getDocument());
+    }
+
+    public void priorizar(Operador operador) throws FWDocumentException {
+        if (holder.getDocument() == null) {
+            System.err.println("Nenhum documento selecionado");
+            return;
+        }
+        Documento documentoAntigo = holder.getDocument();
+        MacroCommand macro = new MacroCommand("Priorizar");
+        macro.adicionarComando(new TornarUrgenteCommand(holder, gestor));
+        macro.adicionarComando(new AssinarCommand(holder, gestor, operador));
+        commandManager.executeCommand(macro);
+        atualizarRepositorio(documentoAntigo, holder.getDocument());
+    }
+
+    public boolean undo() {
+        Documento docAtual = holder.getDocument();
+        boolean resultado = commandManager.undo();
+        if (resultado) {
+            Documento docNovo = holder.getDocument();
+            // Se documento mudou após undo
+            if (docAtual != docNovo) {
+                // Remove documento que foi "desfeito"
+                if (docNovo == null && docAtual != null) {
+                    repositorio.remove(docAtual);
+                    System.out.println("Documento removido do repositório (undo de criação)");
+                }
+                // Se ambos não são null, era um decorator - ATUALIZA no repositório
+                else if (docAtual != null && docNovo != null) {
+                    atualizarRepositorio(docAtual, docNovo);
+                    System.out.println("Documento atualizado no repositório (undo de decorator)");
+                }
+            }
+        }
+        return resultado;
+    }
+
+    public boolean redo() throws FWDocumentException {
+        Documento docAtual = holder.getDocument();
+        boolean resultado = commandManager.redo();
+        if (resultado) {
+            Documento docNovo = holder.getDocument();
+            if (docAtual != docNovo) {
+                // Se era null e agora tem documento, é recriação - ADICIONA
+                if (docAtual == null && docNovo != null) {
+                    if (!repositorio.contains(docNovo)) {
+                        repositorio.add(docNovo);
+                        System.out.println("Documento adicionado ao repositório (redo de criação)");
+                    }
+                }
+                // Se ambos não são null, era decorator - ATUALIZA
+                else if (docAtual != null && docNovo != null) {
+                    atualizarRepositorio(docAtual, docNovo);
+                    System.out.println("Documento atualizado no repositório (redo de decorator)");
+                }
+            }
+        }
+        return resultado;
+    }
+
+    public void consolidar() {
+        commandManager.consolidate();
+    }
+
+    private void atualizarRepositorio(Documento antigo, Documento novo) {
+        if (antigo != null && novo != null && antigo != novo) {
+            int index = repositorio.indexOf(antigo);
+            if (index >= 0) {
+                repositorio.set(index, novo);
+            } else if (!repositorio.contains(novo)) {
+                repositorio.add(novo);
+            }
+        }
+    }
+
+    public Documento getDocumentoAtual() {
+        return holder.getDocument();
     }
 
     public List<Documento> getRepositorio() {
         return repositorio;
     }
-    
-    public Documento assinarDocumento(Documento doc) throws FWDocumentException {
-        if (doc == null) return null;
-        Operador operador = factory.getOperador();
-        operador.inicializar("jdc", "João das Couves");
-        Documento assinado = gestor.assinar(doc, operador);
-        this.atualizarRepositorio(doc, assinado);
-        this.atual = assinado;
-        return assinado;
-    }    
-    
-    public Documento protegerDocumento(Documento doc) throws FWDocumentException {
-        if (doc == null) return null;
-        Documento protegido = gestor.proteger(doc);
-        this.atualizarRepositorio(doc, protegido);
-        this.atual = protegido;
-        return protegido;        
-    }    
-    
-    
-    public Documento tornarUrgente(Documento doc) throws FWDocumentException {
-        if (doc == null) return null;
-        Documento urgente = gestor.tornarUrgente(doc);
-        this.atualizarRepositorio(doc, urgente);
-        this.atual = urgente;
-        return urgente;         
-    }      
-    
-    public void atualizarRepositorio(Documento antigo, Documento novo) {
-        int index = repositorio.indexOf(antigo);
-        if (index != -1) {
-            repositorio.set(index, novo);
-        }
-    } 
-    
-	public Documento getDocumentoAtual() {
-		return this.atual;
-	}
-	
+
 	public void setDocumentoAtual(Documento doc) {
-		this.atual = doc;
+		this.holder.setDocument(doc);
 	}        
     
     

@@ -9,7 +9,7 @@ Como esse sistema de gerenciamento de documentos tem diferentes tipos de documen
 * Documentos para exportação precisam verificar se são sigilosos ou públicos
 * Documentos gerais precisam apenas de um código simples com timestamp
 
-Sem o uso do Strategy, teríamos que usar múltiplos if-else ou switches dentro da classe Autenticador, violando o Princípio Aberto/Fechado (OCP). Com o Strategy, podemos adicionar mais estratégias de autenticação modificando minimamente o código que já existe.
+Sem o uso do Strategy, teríamos que usar múltiplos if-else ou switches dentro da classe Autenticador, violando o Princípio Aberto/Fechado (OCP). Com o Strategy, podemos adicionar mais estratégias de autenticação, modificando minimamente o código que já existe.
 
 ## Estrutura do Padrão
 
