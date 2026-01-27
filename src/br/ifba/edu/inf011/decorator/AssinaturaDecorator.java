@@ -1,10 +1,9 @@
 package br.ifba.edu.inf011.decorator;
 
-import java.time.format.DateTimeFormatter;
-
 import br.ifba.edu.inf011.model.Assinatura;
 import br.ifba.edu.inf011.model.FWDocumentException;
 import br.ifba.edu.inf011.model.documentos.Documento;
+import java.time.format.DateTimeFormatter;
 
 public class AssinaturaDecorator extends DocumentoDecorator implements Documento {
 
@@ -16,6 +15,13 @@ public class AssinaturaDecorator extends DocumentoDecorator implements Documento
 	}
 	
 	@Override
+	public void setConteudo(String conteudo){
+	    String regexAssinatura = "\\nAssinado por: .*? em \\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}";
+	    String conteudoLimpo = conteudo.replaceAll(regexAssinatura, "");
+	    super.setConteudo(conteudoLimpo.trim());
+	}	
+	
+	@Override
 	public String getConteudo() throws FWDocumentException{
 		DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 		String dataFormatada = this.assinatura.dataAssinatura().format(formatador);
@@ -24,6 +30,5 @@ public class AssinaturaDecorator extends DocumentoDecorator implements Documento
 			   "\nAssinado por: " + this.assinatura.usuario().getNome() + " em " 
 								  + dataFormatada;
 	}
-	
 
 }
