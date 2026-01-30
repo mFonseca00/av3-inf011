@@ -118,7 +118,6 @@ public class GerenciadorDocumentoModel {
     }
 
     public void priorizar() throws FWDocumentException {
-        // Mock de operador
         Operador operador = factory.getOperador();
         operador.inicializar("jdc", "João das Couves");
 
@@ -141,12 +140,12 @@ public class GerenciadorDocumentoModel {
             Documento docNovo = holder.getDocument();
             // Se documento mudou após undo
             if (docAtual != docNovo) {
-                // Remove documento que foi "desfeito"
+                // Remove documento que foi desfeito
                 if (docNovo == null && docAtual != null) {
                     repositorio.remove(docAtual);
                     System.out.println("Documento removido do repositório (undo de criação)");
                 }
-                // Se ambos não são null, era um decorator - ATUALIZA no repositório
+                // Se ambos não são null, era um decorator - att
                 else if (docAtual != null && docNovo != null) {
                     atualizarRepositorio(docAtual, docNovo);
                     System.out.println("Documento atualizado no repositório (undo de decorator)");
@@ -162,14 +161,14 @@ public class GerenciadorDocumentoModel {
         if (resultado) {
             Documento docNovo = holder.getDocument();
             if (docAtual != docNovo) {
-                // Se era null e agora tem documento, é recriação - ADICIONA
+                // Se era null e agora tem documento, é recriação - add
                 if (docAtual == null && docNovo != null) {
                     if (!repositorio.contains(docNovo)) {
                         repositorio.add(docNovo);
                         System.out.println("Documento adicionado ao repositório (redo de criação)");
                     }
                 }
-                // Se ambos não são null, era decorator - ATUALIZA
+                // Se ambos não são null, era decorator - att
                 else if (docAtual != null && docNovo != null) {
                     atualizarRepositorio(docAtual, docNovo);
                     System.out.println("Documento atualizado no repositório (redo de decorator)");

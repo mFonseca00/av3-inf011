@@ -2,7 +2,7 @@ package br.ifba.edu.inf011.command;
 
 import br.ifba.edu.inf011.model.documentos.Documento;
 
-// Usado para armazenar o documento atual no Command pattern antes de executar comandos
+// Usado para armazenar o documento atual no Command pattern antes de executar comandos e facilitar a adição ao repositório
 public class DocumentHolder {
     private Documento documento;
 

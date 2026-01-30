@@ -52,7 +52,7 @@ Código é atribuído ao documento
 
 <h1 align="center"> Questão 2 </h1>
 
-## Porque decidimos usar Command nesse contexto
+## Porque decidimos usar Command (e Composite) nesse contexto
 
 Com o crescimento do volume de documentos no framework, os usuários passaram a demandar maior produtividade e segurança. O Conselho de Gestão de TI estabeleceu novos requisitos arquiteturais obrigatórios:
 
@@ -64,11 +64,28 @@ Com o crescimento do volume de documentos no framework, os usuários passaram a 
 
 Sem o uso do Command, teríamos que implementar lógica de undo/redo e logging diretamente em cada método que altera documentos (assinar, proteger, setConteudo), resultando em código duplicado e violando o Princípio da Responsabilidade Única (SRP). Com o Command, encapsulamos cada operação como um objeto independente, permitindo parametrização, enfileiramento, registro de histórico e reversibilidade uniforme.
 
-## Estrutura do Padrão
+Além disso, utilizamos o padrão **Composite** para permitir que comandos sejam agrupados em operações compostas (Macros), possibilitando que múltiplos comandos sejam executados e desfeitos como uma única ação, mantendo a flexibilidade e a uniformidade do framework.
 
+## Estrutura do Padrão Command
 O padrão Command possui uma estrutura composta da seguinte forma:
 
-Command (Que no nosso código é a interface Command) que define o contrato para operações reversíveis (execute, undo, getLogInfo). Essa interface é implementada pelos Concrete Commands (Que no nosso código são as classes CriarDocCommand, SalvarCommand, AssinarCommand, ProtegerCommand, TornarUrgenteCommand e MacroCommand). O Receiver (Que no nosso código é o DocumentHolder) mantém a referência ao documento sendo manipulado. O Invoker (Que no nosso código é o CommandManager) gerencia a execução dos comandos, o histórico de undo/redo e o logging. Por fim, o Client (Que no nosso código é o GerenciadorDocumentoModel) cria os comandos concretos e delega sua execução ao CommandManager. Caso seja necessário adicionar uma nova operação, basta criar um novo Command e passá-lo ao CommandManager, mantendo o código expansível e desacoplado.
+Command (Que no nosso código é a interface Command) que define o contrato para operações reversíveis (execute, undo, getLogInfo). Essa interface é implementada pelos Concrete Commands (Que no nosso código são as classes CriarDocCommand, SalvarCommand, AssinarCommand, ProtegerCommand, TornarUrgenteCommand e MacroCommand).
+
+Os Receivers (Que no nosso código são as classes GestorDocumento e Documento) são responsáveis por executar as lógicas de negócio sobre os documentos, como assinar, proteger, marcar como urgente, etc.
+
+Também criamos o DocumentHolder, que atua apenas como um holder para manter a referência ao documento atual, facilitando o gerenciamento do estado antes e depois das operações.
+
+O Invoker (Que no nosso código é o CommandManager) gerencia a execução dos comandos, o histórico de undo/redo e o logging.
+
+Por fim, o Client (Que no nosso código é o GerenciadorDocumentoModel) cria os comandos concretos e delega sua execução ao CommandManager. Caso seja necessário adicionar uma nova operação, basta criar um novo Command e passá-lo ao CommandManager, mantendo o código expansível e desacoplado.
+
+## Estrutura do Padrão Composite
+
+O padrão Composite foi utilizado para permitir que comandos sejam agrupados em operações compostas (Macros), de modo que comandos individuais e compostos possam ser tratados de forma uniforme.
+
+No nosso código, a interface Command atua como o Component do padrão Composite. O MacroCommand implementa Command e pode conter uma lista de outros comandos (Command), sejam eles simples ou outros MacroCommands, permitindo a composição recursiva de operações.
+
+O Invoker (CommandManager) trata MacroCommands da mesma forma que comandos simples, executando ou desfazendo toda a sequência de comandos agrupados.
 
 ## Fluxo de Funcionamento
 
@@ -170,7 +187,7 @@ Se undo() for chamado, comandos
 são desfeitos em ordem reversa
 ```
 
-## Resumo dos Papéis
+## Resumo dos Papéis - Command
 
 | Componente        | Classe/Interface          | Responsabilidade                                                      |
 |-------------------|---------------------------|-----------------------------------------------------------------------|
@@ -180,10 +197,21 @@ são desfeitos em ordem reversa
 | ConcreteCommand   | `AssinarCommand`          | Encapsula assinatura                                                  |
 | ConcreteCommand   | `ProtegerCommand`         | Encapsula proteção via proxy                                          |
 | ConcreteCommand   | `TornarUrgenteCommand`    | Encapsula marcação de urgência                                        |
-| ConcreteCommand   | `MacroCommand`            | Encapsula sequência de comandos (Composite)                           |
-| Receiver          | `DocumentHolder`          | Mantém referência ao documento sendo manipulado                       |
+| ConcreteCommand   | `MacroCommand`            | Encapsula sequência de comand (Composite)                           |
+| Receiver | GestorDocumento, Documento | Executam as operações de negócio sobre os documentos |
+| Auxiliar (helper que não faz parte do padrão) | DocumentHolder | Mantém referência ao documento atual para facilitar undo/redo |
 | Invoker           | `CommandManager`          | Gerencia execução, histórico (undo/redo) e logging                    |
 | Client            | `GerenciadorDocumentoModel` | Cria comandos e delega execução ao CommandManager                   |
+
+## Resumo dos Papéis - Composite
+
+| Componente        | Classe/Interface   | Responsabilidade                                                                 |
+|-------------------|--------------------|----------------------------------------------------------------------------------|
+| Component         | `Command`          | Interface comum para comandos simples e compostos                                |
+| Leaf              | `CriarDocCommand`, `SalvarCommand`, etc. | Comandos simples que executam operações atômicas                      |
+| Composite         | `MacroCommand`     | Agrupa múltiplos comandos (simples ou outros MacroCommands) e executa em bloco   |
+| Client            | `GerenciadorDocumentoModel` | Cria comandos simples ou compostos e os envia ao CommandManager           |
+| Invoker           | `CommandManager`   | Executa comandos simples ou compostos de forma uniforme                          |
 
 ## Log de Operações
 
