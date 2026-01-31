@@ -222,3 +222,8 @@ Exemplo de linha registrada no log:
 ```
 [2026-01-28 14:30:15] EXECUTE - Criar documento - Privacidade: PUBLICO
 ```
+
+---
+
+Projeto elaborado por Marcus Fonseca, Renato Rayfgson e Guilherme Estrela.
+
