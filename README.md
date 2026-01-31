@@ -15,7 +15,7 @@ Sem o uso do Strategy, teríamos que usar múltiplos if-else ou switches dentro 
 
 O padrão Strategy possui uma estrutura composta da seguinte forma: 
 
-Context (Que no nosso código é a classe Autenticador) que usa a Interface de Strategy (Que no nosso código é representado por AuthStrategy) e essa interface é implementada pela Concrete Strategy (Que no nosso código são as classes DefaultAuthStrategy, CriminalAuthStrategy, ExportAuthStrategy, PessoalAuthStrategy). Por fim, alteramos o Client (Que no nosso código é o GerenciadorDocumentoModel) para inicializar um hashmap responsável de armazenar os indexes para a escolha da estratégia e chamar o autenticador, que seta a estratégia e autentica. Caso seja necessário adicionar uma nova estrategia, basta criá-la e adicionar ao map, tornando o código expansível.
+Context (Que no nosso código é a classe Autenticador) que usa a Interface de Strategy (Que no nosso código é representado por AuthStrategy) e essa interface é implementada pela Concrete Strategy (Que no nosso código são as classes DefaultAuthStrategy, CriminalAuthStrategy, ExportAuthStrategy, PessoalAuthStrategy). Por fim, alteramos o Client (Que no nosso código é o GerenciadorDocumentoModel) para inicializar um hashmap responsável por armazenar os indexes para a escolha da estratégia e chamar o autenticador, que seta a estratégia e autentica. Caso seja necessário adicionar uma nova estrategia, basta criá-la e adicionar ao map, o que torna o código expansível.
 
 ## Fluxo de Funcionamento
 ```text
